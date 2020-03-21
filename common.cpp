@@ -541,8 +541,9 @@ void ShowScore(HDC hdc)
 	char strScore[10] = { 0 };
 	Rectangle(hdc, 300, 0, 500, 600);
 	_itoa(g_nScore, strScore, 10);
-	TextOut(hdc, 375, 20, "Score", strlen("Score"));
-	TextOut(hdc, 390, 40, strScore, strlen(strScore));
+	TextOut(hdc, 335, 20, "Press Enter to start", strlen("Press Enter to start"));
+	TextOut(hdc, 375, 40, "Score", strlen("Score"));
+	TextOut(hdc, 390, 60, strScore, strlen(strScore));
 }
 
 BOOL IsGameOver()
