@@ -7,6 +7,11 @@
 #include <time.h>
 
 #define DEFAULT_TIMER 1
+typedef struct
+		{int SquareType; 
+		int PositionX; 
+		int PositionY;}
+SquareInfo;
 
 //winEvent
 void OnCreate();
@@ -14,8 +19,9 @@ void OnTimer(HWND hWnd);
 void OnPaint(HDC hdc);
 
 //paintSquare
-int CreatRandomSquare();
+SquareInfo CreatRandomSquare();
 void CopySquareToBackground();
+void PaintSquareToTips(HDC hdc);
 void FixBottomSquare();
 void PaintSqure(HDC hdc);
 void PaintBottomSqure(HDC hdc);

@@ -1,6 +1,7 @@
 #include "common.h"
+#include <queue>
 
-//back ground array
+//background array
 char g_arrBackgroud[20][10] = { 0 };
 //square array
 char g_arrSquare[2][4] = { 0 };
@@ -12,12 +13,28 @@ int g_nCol = -1;
 //score
 int g_nScore = 0;
 
+std::queue<SquareInfo> qSquareType;
+
+
 //call from WM_CREATE
 void OnCreate()
 {
+	SquareInfo si;
+
 	srand((unsigned int)time(NULL));
-	CreatRandomSquare();
+
+	si = CreatRandomSquare();
+	qSquareType.push(si);
 	CopySquareToBackground();
+
+	//Create next square, for tips
+	si = CreatRandomSquare();
+	qSquareType.push(si);
+
+	//get current square type
+	g_nSquare = qSquareType.front().SquareType;
+	g_nLine = qSquareType.front().PositionX;
+	g_nCol = qSquareType.front().PositionY;
 }
 
 
@@ -25,6 +42,7 @@ void OnCreate()
 void OnTimer(HWND hWnd)
 {
 	HDC hDc = GetDC(hWnd);
+
 	if (FALSE == ReachBottom() && FALSE == ReachSquareOnBottom())
 	{
 		SquareDown();
@@ -36,12 +54,38 @@ void OnTimer(HWND hWnd)
 		EliminateOneLine();
 		if (TRUE == IsGameOver())
 		{
-			MessageBox(NULL, "Game Over", "", MB_OK);
-			KillTimer(hWnd, DEFAULT_TIMER);
+			int nRe = MessageBox(NULL, "Game Over, play again?", "", MB_YESNO);
+			if (IDYES == nRe)
+			{
+				for (int i = 0; i < 20; i++)
+				{
+					for (int j = 0; j < 10; j++)
+					{
+						g_arrBackgroud[i][j] = { 0 };
+					}
+				}
+				OnCreate();
+				g_nScore = 0;
+				
+			}
+			else if(IDNO == nRe)
+			{
+				KillTimer(hWnd, DEFAULT_TIMER);
+				PostQuitMessage(0);
+			}
 			return;
 		}
-		CreatRandomSquare();
+
 		CopySquareToBackground();
+
+		qSquareType.pop();
+		SquareInfo si = CreatRandomSquare();
+		qSquareType.push(si);
+		
+		g_nSquare = qSquareType.front().SquareType;
+		g_nLine = qSquareType.front().PositionX;
+		g_nCol = qSquareType.front().PositionY;
+
 	}
 
 	OnPaint(hDc);
@@ -62,6 +106,7 @@ void OnPaint(HDC hdc)
 	PaintBottomSqure(hBgDc);
 	PaintSqure(hBgDc);
 	ShowScore(hBgDc);
+	PaintSquareToTips(hBgDc);
 	//bring to front
 	BitBlt(hdc, 0, 0, 500, 600, hBgDc, 0, 0, SRCCOPY);
 	
@@ -71,42 +116,53 @@ void OnPaint(HDC hdc)
 }
 
 
-int CreatRandomSquare()
+SquareInfo CreatRandomSquare()
 {
 	int n = rand() % 7;
+	SquareInfo si;
 
 	switch (n)
 	{
 	case 0:
 		g_arrSquare[0][0] = 1, g_arrSquare[0][1] = 1, g_arrSquare[0][2] = 0, g_arrSquare[0][3] = 0;
 		g_arrSquare[1][0] = 0, g_arrSquare[1][1] = 1, g_arrSquare[1][2] = 1, g_arrSquare[1][3] = 0;
-		g_nLine = 0;
-		g_nCol = 3;
+		si.PositionX = 0;
+		si.PositionY = 3;
+		//g_nLine = 0;
+		//g_nCol = 3;
 		break;
 	case 1:
 		g_arrSquare[0][0] = 0, g_arrSquare[0][1] = 1, g_arrSquare[0][2] = 1, g_arrSquare[0][3] = 0;
 		g_arrSquare[1][0] = 1, g_arrSquare[1][1] = 1, g_arrSquare[1][2] = 0, g_arrSquare[1][3] = 0;
-		g_nLine = 0;
-		g_nCol = 3;
+		si.PositionX = 0;
+		si.PositionY = 3;
+		//g_nLine = 0;
+		//g_nCol = 3;
 		break;
 	case 2:
 		g_arrSquare[0][0] = 1, g_arrSquare[0][1] = 1, g_arrSquare[0][2] = 1, g_arrSquare[0][3] = 0;
 		g_arrSquare[1][0] = 0, g_arrSquare[1][1] = 0, g_arrSquare[1][2] = 1, g_arrSquare[1][3] = 0;
-		g_nLine = 0;
-		g_nCol = 3;
+		si.PositionX = 0;
+		si.PositionY = 3;
+		//g_nLine = 0;
+		//g_nCol = 3;
 		break;
 	case 3:
 		g_arrSquare[0][0] = 1, g_arrSquare[0][1] = 1, g_arrSquare[0][2] = 1, g_arrSquare[0][3] = 0;
 		g_arrSquare[1][0] = 1, g_arrSquare[1][1] = 0, g_arrSquare[1][2] = 0, g_arrSquare[1][3] = 0;
-		g_nLine = 0;
-		g_nCol = 3;
+		si.PositionX = 0;
+		si.PositionY = 3;
+		//g_nLine = 0;
+		//g_nCol = 3;
 		break;
 
 	case 4:
 		g_arrSquare[0][0] = 0, g_arrSquare[0][1] = 1, g_arrSquare[0][2] = 0, g_arrSquare[0][3] = 0;
 		g_arrSquare[1][0] = 1, g_arrSquare[1][1] = 1, g_arrSquare[1][2] = 1, g_arrSquare[1][3] = 0;
-		g_nLine = 0;
-		g_nCol = 3;
+		si.PositionX = 0;
+		si.PositionY = 3;
+		//g_nLine = 0;
+		//g_nCol = 3;
 		break;
 
 	case 5:
@@ -116,15 +172,18 @@ int CreatRandomSquare()
 	case 6:
 		g_arrSquare[0][0] = 1, g_arrSquare[0][1] = 1, g_arrSquare[0][2] = 1, g_arrSquare[0][3] = 1;
 		g_arrSquare[1][0] = 0, g_arrSquare[1][1] = 0, g_arrSquare[1][2] = 0, g_arrSquare[1][3] = 0;
-		g_nLine = 0;
-		g_nCol = 4;
+		si.PositionX = 0;
+		si.PositionY = 4;
+		//g_nLine = 0;
+		//g_nCol = 4;
 		break;
 
 	default:
 		break;
 	}
-	g_nSquare = n;
-	return n;
+	//g_nSquare = n;
+	si.SquareType = n;
+	return si;
 }
 
 
@@ -138,6 +197,22 @@ void CopySquareToBackground()
 			g_arrBackgroud[i][j + 3] = g_arrSquare[i][j];
 		}
 	}
+}
+
+void PaintSquareToTips(HDC hdc)
+{
+	for (int i = 0; i < 2; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			if (1 == g_arrSquare[i][j])
+			{
+				Rectangle(hdc, 330 + j*30, 240+i*30, 360+j*30, 270+i*30);
+			}
+			
+		}
+	}
+
 }
 
 
@@ -166,7 +241,7 @@ void PaintBottomSqure(HDC hdc)
 	//show bottom square in green
 	HBRUSH hOldBrush;
 	HBRUSH hNewBrush = CreateSolidBrush(RGB(0, 64, 0));
-	hOldBrush = SelectObject(hdc, hNewBrush);
+	hOldBrush = (HBRUSH)SelectObject(hdc, hNewBrush);
 	//draw bottom square
 	for (int i = 0; i < 20; i++)
 	{
@@ -178,7 +253,7 @@ void PaintBottomSqure(HDC hdc)
 			}
 		}
 	}
-	hNewBrush = SelectObject(hdc, hOldBrush);
+	hNewBrush = (HBRUSH)SelectObject(hdc, hOldBrush);
 	DeleteObject(hNewBrush);
 }
 
@@ -436,6 +511,7 @@ void RotateBar()
 
 void EliminateOneLine()
 {
+	//sum marker of line array, 20 means full of square, which should be eliminated 
 	int nSum;
 	for (int i = 19; i >= 0; i--)
 	{
